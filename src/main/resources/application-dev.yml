@@ -34,3 +34,6 @@ application:
     jwt:
       secret-key: b7b6b4dad4b13239d0d357dd5a7f93b3e477ee59e215c088eb2a1af267be481d0f668cc95b5197dc10797d13eaa36ecb410c3a5c1a49c4e96d4d040937eb2f74e1c3b2c083b5e1aaa985e18ed0aa67bb74d4ad7c42c82e532d16cf409dabbbfe6232bea5f1771488c8841e25e0f380a81550fc6fc4a52ce9ca2902aa8d71f6f1
       expiration: 86400000
+  mailing:
+    frontend:
+      activation-url: http://localhost:4200/activate-account

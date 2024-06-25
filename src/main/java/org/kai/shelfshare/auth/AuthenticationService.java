@@ -5,12 +5,16 @@ package org.kai.shelfshare.auth;
  * @author  Suswagatam Rong
  */
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.kai.shelfshare.email.EmailService;
+import org.kai.shelfshare.email.EmailTemplateName;
 import org.kai.shelfshare.role.RoleRepository;
 import org.kai.shelfshare.user.Token;
 import org.kai.shelfshare.user.TokenRepository;
 import org.kai.shelfshare.user.User;
 import org.kai.shelfshare.user.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +29,12 @@ public class AuthenticationService {
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
 	private final TokenRepository tokenRepository;
+	private final EmailService emailService;
 
-	public void register(RegistrationRequest request) {
+	@Value("${application.mailing.frontend.activation-url}")
+	private String activationUrl;
+
+	public void register(RegistrationRequest request) throws MessagingException {
 
 		var userRole = roleRepository.findByName("USER")
 				.orElseThrow(() -> new IllegalStateException("Role USER not initialised")); // TODO: Implement better Exception Handling
@@ -45,11 +53,18 @@ public class AuthenticationService {
 		sendValidationEmail(user);
 	}
 
-	private void sendValidationEmail(User user) {
+	private void sendValidationEmail(User user) throws MessagingException {
 
 		var newToken = generateAndSaveActivationToken(user);
-		// TODO: Send Email
 
+		emailService.sendEmail(
+				user.getEmail(),
+				user.fullName(),
+				EmailTemplateName.ACTIVATE_ACCOUNT,
+				activationUrl,
+				newToken,
+				"Account Activation"
+		);
 	}
 
 	private String generateAndSaveActivationToken(User user) {
